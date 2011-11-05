@@ -35,7 +35,7 @@ sub fetch_data {
     ) or die "Could not connect to $database: $DBI::errstr";
 
     my $rows = $dbh->selectall_arrayref(
-        'SELECT id,parent_id,lft,rgt,identifier,name FROM ?',
+        'SELECT id,parent_id,lft,rgt,identifier,name FROM ? ORDER BY id ASC',
         undef,
         $table,
     );
@@ -72,8 +72,10 @@ sub update_tree {
 }
 
 sub dump_sql {
+    my $p = 1 + int(log($row[-1]->{'id'}) / log(10));
+    my $d = "0${p}d";
     foreach my $row (@{$rows}) {
-        printf("/* (%03d, %03d): (%03d, %03d) -> (%03d, %03d) %s */\n",
+        printf("/* (%$d, %$d): (%$d, %$d) -> (%$d, %$d) %s */\n",
             $row->{'parent_id'} || 0,
             $row->{'id'},
             $row->{'lft_old'},
