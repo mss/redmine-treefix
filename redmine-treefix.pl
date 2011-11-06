@@ -65,7 +65,7 @@ sub update_tree {
     $root->{'lft_old'} = $root->{'lft'};
     $root->{'lft'} = $count++;
 
-    map update_tree @{$root->{'children'};
+    map update_tree @{$root->{'children'}};
 
     $root->{'rgt_old'} = $root->{'rgt'};
     $root->{'rgt'} = $count++;
