@@ -12,13 +12,13 @@ my $password = "password";
 my $table    = "projects";
 
 
-my $rows;
+my @rows;
 my $tree = {};
 
 my $count = 0;
 
 sub main {
-    $rows = fetch_data;
+    @rows = fetch_data;
 
     $tree = build_tree;
     $tree = update_tree;
@@ -42,7 +42,7 @@ sub fetch_data {
 
     $dbh->disconnect;
 
-    return $rows;
+    return @{$rows};
 }
 
 sub build_tree {
@@ -52,7 +52,7 @@ sub build_tree {
             $a->{'identifier'} cmp $b->{'identifier'}
         } grep {
             $_->{'parent_id'} ~~ $root->{'id'}
-        } @{$rows};
+        } @rows;
     map build_tree @children;
 
     $root->{'children'} = \@children;
@@ -79,7 +79,7 @@ sub dump_sql {
 
     my $p = 1 + int(log($row[-1]->{'id'}) / log(10));
     my $d = "0${p}d";
-    foreach my $row (@{$rows}) {
+    foreach my $row (@rows) {
         printf("/* (%$d, %$d): (%$d, %$d) -> (%$d, %$d) %s: %s */\n",
             $row->{'parent_id'} || 0,
             $row->{'id'},
