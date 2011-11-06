@@ -72,6 +72,11 @@ sub update_tree {
 }
 
 sub dump_sql {
+    printf("USE %s;\n",
+        $database
+    );
+    printf("START TRANSACTION;\n");
+
     my $p = 1 + int(log($row[-1]->{'id'}) / log(10));
     my $d = "0${p}d";
     foreach my $row (@{$rows}) {
@@ -91,6 +96,8 @@ sub dump_sql {
             $row->{'id'},
         );
     }
+
+    printf("COMMIT;\n");
 }
 
 
