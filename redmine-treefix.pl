@@ -13,7 +13,15 @@ my $table    = "projects";
 
 
 my @rows;
-my $tree = {};
+my $tree = {
+    id         => undef,
+    parent_id  => undef,
+    lft        => undef,
+    rgt        => undef,
+    identifier => "root",
+    name       => "Virtual Root",
+    children   => [],
+};
 
 my $count = 0;
 
