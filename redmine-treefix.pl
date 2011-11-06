@@ -49,7 +49,7 @@ sub build_tree {
     my $root = shift || $tree;
 
     my @children = sort {
-            $a->{identifier} cmp $b->{identifier}
+            $a->{'identifier'} cmp $b->{'identifier'}
         } grep {
             $_->{'parent_id'} ~~ $root->{'id'}
         } @{$rows};
