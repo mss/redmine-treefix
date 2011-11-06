@@ -80,7 +80,7 @@ sub dump_sql {
     my $p = 1 + int(log($row[-1]->{'id'}) / log(10));
     my $d = "0${p}d";
     foreach my $row (@{$rows}) {
-        printf("/* (%$d, %$d): (%$d, %$d) -> (%$d, %$d) %s */\n",
+        printf("/* (%$d, %$d): (%$d, %$d) -> (%$d, %$d) %s: %s */\n",
             $row->{'parent_id'} || 0,
             $row->{'id'},
             $row->{'lft_old'},
@@ -88,6 +88,7 @@ sub dump_sql {
             $row->{'lft'},
             $row->{'rgt'},
             $row->{'identifier'},
+            $row->{'name'},
         );
         printf("UPDATE %s SET lft = %d, rgt = %d WHERE id = %d;\n",
             $table,
