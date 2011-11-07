@@ -122,7 +122,7 @@ sub dump_sql {
     );
     printf("START TRANSACTION;\n\n");
 
-    my $p = 1 + int(log($rows[-1]->{'id'}) / log(10));
+    my $p = 1 + int(log((sort { $a->{'rgt'} <=> $b->{'rgt'} } @rows)[-1]->{'rgt'}) / log(10));
     my $d = "0${p}d";
     foreach my $row (sort { $a->{'lft'} <=> $b->{'lft'} } @rows) {
         printf("/* (%$d, %$d): (%$d, %$d) -> (%$d, %$d) %s: '%s' */\n",
