@@ -4,6 +4,8 @@ use 5.010;
 
 use Getopt::Std;
 use Data::Dumper;
+$Data::Dumper::Terse    = 1;
+$Data::Dumper::Sortkeys = 1;
 
 use DBI;
 
@@ -14,6 +16,8 @@ my $password = "";
 my $table    = "projects";
 my $sortby   = "name";
 
+my $dodump;
+
 
 my @rows;
 my $tree = {
@@ -23,7 +27,7 @@ my $tree = {
     rgt        => undef,
     identifier => "root",
     name       => "Virtual Root",
-    children   => [],
+    x          => [],
 };
 
 my $count = 0;
@@ -40,21 +44,28 @@ sub main {
     @rows = fetch_data;
 
     $tree = build_tree;
-    print Dumper($tree);
+    if ($dodump) {
+        print STDERR "original tree: ";
+        print STDERR Dumper($tree);
+    }
     $tree = update_tree;
+    if ($dodump) {
+        print STDERR "updated tree:  ";
+        print STDERR Dumper($tree);
+    }
 
-    
     dump_sql;
 }
 
 sub parse_args {
     my %opts;
-    getopts('d:u:p:t:', \%opts) or die;
+    getopts('d:u:p:t:s:D', \%opts) or die;
     $database = $opts{'d'} if $opts{'d'};
     $username = $opts{'u'} if $opts{'u'};
     $password = $opts{'p'} if $opts{'p'};
     $table    = $opts{'t'} if $opts{'t'};
     $sortby   = $opts{'s'} if $opts{'s'};
+    $dodump   = $opts{'D'};
 }
 
 sub fetch_data {
@@ -73,7 +84,7 @@ sub fetch_data {
     $dbh->disconnect;
 
     return sort {
-            $a->{$sortby} cmp $b->{$sortby}
+            lc($a->{$sortby}) cmp lc($b->{$sortby})
         } values %{$rows};
 }
 
@@ -85,7 +96,7 @@ sub build_tree {
         } @rows;
     map { build_tree $_ } @children;
 
-    $root->{'children'} = \@children;
+    $root->{'x'} = \@children;
     return $root;
 }
 
@@ -95,10 +106,12 @@ sub update_tree {
     $root->{'lft_old'} = $root->{'lft'};
     $root->{'lft'}     = $count++;
 
-    map { update_tree $_ } @{$root->{'children'}};
+    map { update_tree $_ } @{$root->{'x'}};
 
     $root->{'rgt_old'} = $root->{'rgt'};
     $root->{'rgt'}     = $count++;
+
+    return $root;
 }
 
 sub dump_sql {
@@ -109,7 +122,7 @@ sub dump_sql {
 
     my $p = 1 + int(log($rows[-1]->{'id'}) / log(10));
     my $d = "0${p}d";
-    foreach my $row (@rows) {
+    foreach my $row (sort { $a->{'lft'} <=> $b->{'lft'} } @rows) {
         printf("/* (%$d, %$d): (%$d, %$d) -> (%$d, %$d) %s: '%s' */\n",
             $row->{'parent_id'} || 0,
             $row->{'id'},
