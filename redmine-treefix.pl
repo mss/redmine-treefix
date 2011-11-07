@@ -5,6 +5,7 @@ use 5.010;
 use Getopt::Std;
 use Data::Dumper;
 $Data::Dumper::Terse    = 1;
+$Data::Dumper::Indent   = 1;
 $Data::Dumper::Sortkeys = 1;
 
 use DBI;
@@ -36,6 +37,7 @@ sub parse_args;
 sub fetch_data;
 sub build_tree;
 sub update_tree;
+sub dump_tree;
 sub dump_sql;
 
 sub main {
@@ -44,17 +46,17 @@ sub main {
     @rows = fetch_data;
 
     $tree = build_tree;
-    if ($dodump) {
-        print STDERR "original tree: ";
-        print STDERR Dumper($tree);
-    }
+    dump_tree;
     $tree = update_tree;
-    if ($dodump) {
-        print STDERR "updated tree:  ";
-        print STDERR Dumper($tree);
-    }
+    dump_tree;
 
     dump_sql;
+}
+
+sub dump_tree {
+    if ($dodump) {
+        print "/* " . Dumper($tree) . "*/\n";
+    }
 }
 
 sub parse_args {
